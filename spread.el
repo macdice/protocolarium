@@ -1,5 +1,8 @@
 ;;; spread.el --- A toy Spread Toolkit client for Emacs
-;; Copyright (c) 2009, 2010 Thomas Munro munro@ip9.org
+;; Copyright (c) 2009, 2010 Thomas Munro
+
+;; Author: Thomas Munro <munro@ip9.org>
+;; Keywords: spread, protocol, multicast
 
 ;;; Commentary:
 ;; 
@@ -39,8 +42,6 @@
 ;; TODO - implement SPREAD-CONNECT-DEFAULT so that you don't have to
 ;;        use SETQ to create it yourself
 ;; TODO - a nice WITH- macro for scoped connections
-;; TODO - split callback into two callbacks -- one for messages,
-;;        one for session/control/network/error events?
 
 ;;; History:
 ;; 
