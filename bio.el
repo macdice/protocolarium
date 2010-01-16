@@ -1,5 +1,8 @@
 ;;; bio.el --- A set of buffer IO routines
-;; Copyright (c) 2009 Thomas Munro munro@ip9.org
+;; Copyright (c) 2009 Thomas Munro
+
+;; Author: Thomas Munro <munro@ip9.org>
+;; Keywords: buffer, binary, io
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -28,6 +31,9 @@
 ;; could take me to bike (k = ?)...  search continues
 ;;
 ;; TODO tidy
+;;
+;; TODO this is quite inefficient code, I like the API but the
+;; implementation needs some work
 
 ;;; History:
 ;; 
