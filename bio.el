@@ -86,7 +86,6 @@ Will not return correct values above a certain limit (2^28?) on
         (let ((c (char-after)))
           (forward-char)
           (let ((d (char-after)))
-            (message "%d %d %d %d" a b c d)
             (+ (* 16777216 a) (* 65536 b) (* 256 c) d)))))))
 
 (defun bio-data-ready-p (buffer)
