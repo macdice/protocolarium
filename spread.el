@@ -354,13 +354,13 @@ SOCKET can be used to access the buffer of incoming data."
                                  message)))
                      ((spread-membership-message-p service-type)
                       (when (spread-connection-membership-callback connection)
-                        (funcall (spread-connection-membership-callback 
+                        (funcall (spread-connection-membership-callback
                                   connection)
                                  (spread-bitmap->membership-type service-type)
                                  (spread-transition-p service-type)
                                  sender
                                  groups)))
-                     (t (message "Ignoring unknown service type %d" 
+                     (t (message "Ignoring unknown service type %d"
                                  service-type)))))))))))
   
 (defun spread-make-sensible-name ()
@@ -368,8 +368,8 @@ SOCKET can be used to access the buffer of incoming data."
   "emacs") ;; TODO work harder -- need unique name 1-11 characters long
 
 (defun spread-default-connection-callback (event message)
-  "A default callback for connection events.  This serves as an
-example and documentation for writing connection callbacks.
+  "A default callback for connection events.
+This serves as an example and documentation for writing connection callbacks.
 EVENT is one of the following symbols:
 
   :connected -- connection establish
@@ -394,13 +394,13 @@ EVENT is one of:
   :leave -- a node has left
   :disconnect -- network disconnection/split between daemons
   :network -- network problem between daemons"
-  (message "Spread membership event: %s, %s, %s, %s" 
-           event 
-           transition 
-           sender 
+  (message "Spread membership event: %s, %s, %s, %s"
+           event
+           transition
+           sender
            groups))
 
-(defun spread-default-message-callback (event sender groups message-type 
+(defun spread-default-message-callback (event sender groups message-type
                                               message)
   "A default callback which simply prints messages out.
 EVENT is the event type, SENDER is the name of the sender, GROUPS
@@ -463,7 +463,7 @@ disconnected with SPREAD-DISCONNECT."
       (kill-buffer buffer-name))
     (with-current-buffer (get-buffer-create buffer-name)
       (set-buffer-multibyte nil))
-    (let* ((connection (make-spread-connection 
+    (let* ((connection (make-spread-connection
                         :message-callback message
                         :membership-callback membership
                         :connection-callback connection
@@ -490,7 +490,7 @@ disconnected with SPREAD-DISCONNECT."
                      (:name . ,name)))
       connection)))
 
-(defun* spread-ready-p (&optional (connection spread-default-connect))
+(defun* spread-ready-p (&optional (connection spread-default-connection))
   "Test if a connection is ready for multicasting."
   (eq (spread-connection-state connection) :connected))
 
@@ -507,7 +507,7 @@ disconnected with SPREAD-DISCONNECT."
   ;; so we might as well allow both to be used at the same time by
   ;; CONSing
   (unless (spread-ready-p connection)
-    (error "spread-multicast -- not ready"))
+    (error "Spread-multicast -- not ready"))
   (let ((use-groups (if group (cons group groups) groups))
         (service-number (logior (spread-service-type->bitmap service)
                                 (if self-discard spread-SELF_DISCARD 0))))
