@@ -1,0 +1,23 @@
+PROTOCOLARIUM
+
+  `Anyone who considers protocol unimportant has never dealt with a
+  cat.' -- Robert A. Heinlein
+
+This is my small collection of protocol-related Emacs Lisp code, or at
+least the subset of it that is tidy enough for me to put on github
+without cringing too much.  It's mostly about network protocols, but
+also covers some binary data formats and systems (for example,
+zoneinfo support).
+
+I have written most of these libraries because I wanted to learn
+something about protocols in a hands-on way or because I wanted
+interact with other systems that I was developing in 'real programming
+languages' for testing purposes, but it's also kind of fun to find
+amusing uses for them in Emacs.  They are toys, not necessarily
+complete implementations of the relevant protocols.
+
+I am putting this code on github in the hope that people will find
+something in here useful enough to want to fork it and share their
+improvements with me!
+
+Copyright (c) 2008, 2009, 2010 Thomas Munro
