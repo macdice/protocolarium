@@ -127,7 +127,6 @@ error will be raised."
 That number of bytes must exist in the buffer, or an error will
 be raised."
   (with-current-buffer buffer
-    (message "skipping %d bytes (%d available)" bytes (point-max))
     (unless (>= (point-max) bytes)
       (error "Bio-skip-bytes -- data not available (programming error)"))
     (delete-region (point-min) (+ (point-min) bytes))))
