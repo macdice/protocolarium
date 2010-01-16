@@ -1,5 +1,5 @@
 ;;; spread.el --- A toy Spread Toolkit client for Emacs
-;; Copyright (c) 2009 Thomas Munro munro@ip9.org
+;; Copyright (c) 2009, 2010 Thomas Munro munro@ip9.org
 
 ;;; Commentary:
 ;; 
