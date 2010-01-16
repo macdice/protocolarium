@@ -37,12 +37,20 @@
 
 ;; Examples of interactive usage:
 ;;
-;;  ELISP> (memcache-connect-default "obelix")
+;;  ELISP> (memcache-connect-default "my-other-machine")
 ;;  #<process stream>
 ;;  ELISP> (memcache-set "test" "boo")
 ;;  "STORED"
 ;;  ELISP> (memcache-get "test")
 ;;  "boo"
+;;  ELISP> (memcache-stats)
+;;  (("pid" "1404")
+;;   ("uptime" "1960")
+;;   ("time" "1263643028")
+;;   ("version" "1.2.2")
+;;   ("pointer_size" "64")
+;;   ... blah blah ...
+;;
 ;;  ELISP> (memcache-close-default)
 ;;  nil
 ;;
@@ -96,7 +104,17 @@ programs) MEMCACHE-WITH-CONNECTION.")
 (defun* memcache-connect (&optional (host memcache-default-host)
                                     (port memcache-default-port))
   "Create a connection to a Memcache server (or similar) on HOST and PORT."
-  (open-network-stream "stream" "*memcache-stream*" host port))
+  ;; TODO buffer name should be unique for each connection!
+  (let ((buffer-name (format "*memcache-stream*")))
+    (when (get-buffer buffer-name)
+      (kill-buffer buffer-name))
+    (with-current-buffer (get-buffer-create buffer-name)
+      (set-buffer-multibyte nil))
+    (make-network-process :host host
+                          :service port
+                          :coding 'binary
+                          :name buffer-name
+                          :buffer buffer-name)))
 
 (defun memcache-close (connection)
   "Close CONNECTION, opened with MEMCACHE-CONNECT."
@@ -119,10 +137,10 @@ probably shouldn't be using this global connection."
   "A syntax for creating a lexically scoped default connection and making
 it the default while executing the body."
   `(progn
-     (memcache-connect-default ,host ,port)
-     (unwind-protect
-         (progn ,@rest)
-       (memcache-close-default))))
+     (let ((memcache-current-connection (memcache-connect ,host ,port)))
+       (unwind-protect
+           (progn ,@rest)
+         (memcache-close memcache-current-connection)))))
 
 (defun memcache-read-line (connection)
   "Read one line synchronously from CONNECTION."
@@ -135,7 +153,8 @@ it the default while executing the body."
             (and (accept-process-output connection memcache-timeout)
                  (goto-char (point-min))
                  (search-forward "\n" nil t)))
-        (let ((result (buffer-substring-no-properties (point-min) (- (point) 1))))
+        (let ((result (buffer-substring-no-properties (point-min)
+                                                      (- (point) 2))))
           (delete-region (point-min) (point))
           result)
       (error "Error reading line"))))
