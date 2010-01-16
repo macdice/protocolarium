@@ -1,5 +1,8 @@
 ;;; omnibuf.el --- Shared buffers and kill-ring using Spread messaging
-;; Copyright (c) 2009 Thomas Munro <munro@ip9.org>
+;; Copyright (c) 2009, 2010 Thomas Munro
+
+;; Author: Thomas Munro <munro@ip9.org>
+;; Keywords: network, share, spread
 
 ;;; Commentary:
 ;; 
