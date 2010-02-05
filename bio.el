@@ -1,8 +1,8 @@
 ;;; bio.el --- A set of buffer IO routines
-;; Copyright (c) 2009 Thomas Munro
+;; Copyright (c) 2009, 2010 Thomas Munro
 
 ;; Author: Thomas Munro <munro@ip9.org>
-;; Keywords: buffer, binary, io
+;; Keywords: buffer, binary, input
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -26,6 +26,10 @@
 ;; which is the natural way of processing input (from processes or network)
 ;; in Emacs.
 ;;
+;; There are also a couple of 'blocking' read functions, which wait for
+;; input -- this is completely unnatural in Emacs, but sometimes it seems
+;; hard to avoid in simple code (without something like continuations).
+;;
 ;; TODO naming -- BIO sounds like it involves output too; ehiggs suggested
 ;; bile (buffer input library for Emacs), following that line of thinking
 ;; could take me to bike (k = ?)...  search continues
@@ -37,6 +41,9 @@
 
 ;;; History:
 ;; 
+;; These are some bits and pieces I found myself implementing again and
+;; again in various unrelated systems, so I wanted to nail them down
+;; in a library.
 
 (require 'cl)
 
@@ -95,7 +102,7 @@ Will not return correct values above a certain limit (2^28?) on
 
 (defun bio-bytes-available (buffer)
   "Check how many bytes are available to be read from BUFFER."
-  (with-current-buffer (process-buffer socket)
+  (with-current-buffer buffer
     (- (point-max) (point-min))))
 
 (defun bio-read-bytes (buffer bytes)
@@ -108,6 +115,20 @@ The data must be ready, or an error will be raised."
                                                   (+ (point-min) bytes))))
       (delete-region (point-min) (+ (point-min) bytes))
       result)))
+
+(defun bio-read-bytes-blocking (buffer bytes timeout)
+  "Read from BUFFER a string of BYTES contiguous bytes, waiting up to TIMEOUT.
+This is not a good way to work with the Emacs IO system, but sometimes it
+seems necessary."
+  (loop (cond ((>= (bio-bytes-available buffer) bytes)
+               (return (bio-read-bytes buffer bytes)))
+              ((< timeout 0.0)
+               (return nil))
+              (t
+               (message "bytes sleep")
+               (let ((start (float-time)))
+                 (accept-process-output (get-buffer-process buffer) timeout)
+                 (decf timeout (- (float-time) start)))))))
 
 (defun bio-peek-bytes (buffer bytes)
   "Read data from BUFFER without consuming it.
@@ -129,6 +150,39 @@ be raised."
     (unless (>= (point-max) bytes)
       (error "Bio-skip-bytes -- data not available (programming error)"))
     (delete-region (point-min) (+ (point-min) bytes))))
+
+(defun bio-has-record-p (buffer delimiter)
+  "Check if BUFFER has at least one 'record' (line etc) ending with DELIMITER."
+  (with-current-buffer buffer
+    (beginning-of-buffer)
+    (search-forward delimiter (point-max) t)))
+
+(defun bio-read-record (buffer delimiter)
+  "Read from BUFFER one record ending with DELIMETER (which is discarded).
+It must have been established that at least one record exists at
+the front of the buffer."
+  (with-current-buffer buffer
+    (beginning-of-buffer)
+    (search-forward delimiter)
+    (let ((result (buffer-substring-no-properties (point-min) 
+                                                  (- (point) (length delimiter)))))
+      (delete-region (point-min) (point))
+      result)))
+
+(defun bio-read-record-blocking (buffer delimiter timeout)
+  "Read from BUFFER one record ending DELIMITER, waiting up to TIMEOUT seconds.
+This is not a very good way of doing things with Emacs -- asynchronous IO is
+best -- but occasionally it seems reasonable, for example, if you want to
+wait until a 'transaction' is completed or similar."
+  (loop (cond ((bio-has-record-p buffer delimiter)
+               (return (bio-read-record buffer delimiter)))
+              ((< timeout 0.0)
+               (return nil))
+              (t
+               (message "record sleep")
+               (let ((start (float-time)))
+                 (accept-process-output (get-buffer-process buffer) timeout)
+                 (decf timeout (- (float-time) start)))))))
 
 (provide 'bio)
 

@@ -79,6 +79,7 @@
 
 ;;; Code:
 
+(require 'bio)
 (require 'cl)
 
 (defvar memcache-default-host "localhost"
@@ -100,6 +101,9 @@ programs) MEMCACHE-WITH-CONNECTION.")
 
 (defvar memcache-timeout 2
   "Time to wait for a response from server before signalling an error.")
+
+(defconst memcache-delimiter "\r\n"
+  "The CP/M-style line delimiter string used by Memcache.")
 
 (defun* memcache-connect (&optional (host memcache-default-host)
                                     (port memcache-default-port))
@@ -144,36 +148,19 @@ it the default while executing the body."
 
 (defun memcache-read-line (connection)
   "Read one line synchronously from CONNECTION."
-  ;; TODO the timeout code here is wrong, need to redesign this so that
-  ;; it loops until MEMCACHE-TIMEOUT is reached, potentially after multiple
-  ;; reads
-  (with-current-buffer (process-buffer connection)
-    (goto-char (point-min))
-    (if (or (search-forward "\n" nil t)
-            (and (accept-process-output connection memcache-timeout)
-                 (goto-char (point-min))
-                 (search-forward "\n" nil t)))
-        (let ((result (buffer-substring-no-properties (point-min)
-                                                      (- (point) 2))))
-          (delete-region (point-min) (point))
-          result)
-      (error "Error reading line"))))
+  (or (bio-read-record-blocking (process-buffer connection)
+                                memcache-delimiter
+                                memcache-timeout)
+      ;; TODO disconnect?
+      (error "memcache-read-line -- timed out waiting for response")))
 
 (defun memcache-read-bytes (connection bytes)
   "Read from CONNECTION a block of BYTES contiguous bytes, into a string."
-  ;; TODO this is rubbish, needs a loop in case the data takes multiple
-  ;; reads before it arrives
-  (with-current-buffer (process-buffer connection)
-    (goto-char (point-min))
-    (if (or (>= (- (point-max) (point-min)) bytes)
-            (and (accept-process-output connection memcache-timeout)
-                 (goto-char (point-min))
-                 (>= (- (point-max) (point-min)) bytes)))
-        (let ((result (buffer-substring-no-properties (point-min)
-                                                      (+ (point-min) bytes))))
-          (delete-region (point-min) (+ (point-min) bytes))
-          result)
-      (error "Error reading data"))))
+  (or (bio-read-bytes-blocking (process-buffer connection)
+                               bytes
+                               memcache-timeout)
+      ;; TODO disconnect?
+      (error "memcache-read-bytes -- timed out waiting for data")))
 
 (defun memcache-check-key (key)
   "Check if KEY is a valid key."
