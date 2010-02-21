@@ -159,15 +159,15 @@ be raised."
 
 (defun bio-read-record (buffer delimiter)
   "Read from BUFFER one record ending with DELIMETER (which is discarded).
-It must have been established that at least one record exists at
-the front of the buffer."
+If no delimiter is found, return NIL."
   (with-current-buffer buffer
     (beginning-of-buffer)
-    (search-forward delimiter)
-    (let ((result (buffer-substring-no-properties (point-min) 
-                                                  (- (point) (length delimiter)))))
-      (delete-region (point-min) (point))
-      result)))
+    (if (search-forward delimiter (point-max) t)
+        (let ((result (buffer-substring-no-properties (point-min) 
+                                                      (- (point) (length delimiter)))))
+          (delete-region (point-min) (point))
+          result)
+      nil)))
 
 (defun bio-read-record-blocking (buffer delimiter timeout)
   "Read from BUFFER one record ending DELIMITER, waiting up to TIMEOUT seconds.
@@ -183,6 +183,24 @@ wait until a 'transaction' is completed or similar."
                (let ((start (float-time)))
                  (accept-process-output (get-buffer-process buffer) timeout)
                  (decf timeout (- (float-time) start)))))))
+
+(defun bio-read-until-regex (buffer pattern)
+  "Read from BUFFER up to and including the regular expression PATTERN.
+If PATTERN is not found, do not consume data and return NIL."
+  (with-current-buffer buffer
+    (goto-char (point-min))
+    (if (search-forward-regexp pattern (point-max) t)
+        (let ((data (buffer-substring-no-properties (point-min) 
+                                                    (match-end 0))))
+          (delete-region (point-min) (match-end 0))
+          data)
+      nil)))
+
+(defun bio-append (buffer data)
+  "Go to the end of BUFFER and insert DATA."
+  (with-current-buffer buffer
+    (end-of-buffer-nomark)
+    (insert data)))
 
 (provide 'bio)
 
