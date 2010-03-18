@@ -19,8 +19,8 @@ Set this variable to alert-send-growl, etc as appropriate.")
 (defvar alert-growl-program "growlnotify"
   "If you use Growl, you may need to set this to the grownnotify path.")
 
-(defvar alert-growl-program "mumble-send"
-  "If you use Mumble, you may need to set this to the mumble-send path.")
+(defvar alert-mumbles-program "mumbles-send"
+  "If you use Mumbles, you may need to set this to the mumbles-send path.")
 
 (defun alert-send-default (title body)
   "Show TITLE and BODY in the minibuffer.
