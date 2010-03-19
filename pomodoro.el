@@ -132,10 +132,10 @@
   "Append TEXT to the end of the current job paragraph."
   (save-excursion
     (end-of-line)
-    (unless (search-backward-regexp "^\\** " (point-min) t)
+    (unless (search-backward-regexp "^\\*+ " (point-min) t)
       (error "Pomodoro -- expected to find job paragraph starting with a star"))
     (end-of-line)
-    (unless (search-forward-regexp "\\(^ *$\\|^\\** \\)" (point-max) t)
+    (unless (search-forward-regexp "\\(^ *$\\|^\\*+ \\)" (point-max) t)
       (goto-char (point-max))
       (insert "\n"))
     (beginning-of-line)
