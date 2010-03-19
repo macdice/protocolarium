@@ -40,6 +40,18 @@
 ;;    possible you should avoid having to do this: instead, register a
 ;;    job for later by running M-x pomodoro-later and entering a brief
 ;;    description, such as 'return call to Fred', or 'put out flames'.
+;;
+;; EXAMPLE OF JOB LOG
+;;
+;; * Implement Scheme for the Commodore 64
+;;   03/20 12:04 started work
+;;   03/20 12:15 *INTERRUPTED* small fire in kitchen started by rats
+;;   03/20 12:18 started work
+;;   03/20 12:33 <break to work on other tasks>
+;;   03/20 12:38 started work
+;;   03/20 12:45 done
+;;
+;; * implement bignum library for the 6502 (deferred at 03/20 12:08)
 
 ;;; History:
 ;; 
@@ -176,3 +188,4 @@
 (provide 'pomodoro)
 
 ;;; pomodoro.el ends here
+
