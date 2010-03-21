@@ -1,8 +1,8 @@
 ;;; alert.el --- Minimalist abstraction of notification services
-;; Copyright (c) 2010 Thomas Munro
+;; Copyright (c) 2010 Thomas Munro, Ewan Higgs
 
 ;; Author: Thomas Munro <munro@ip9.org>
-;; Keywords: buffer, binary, input
+;; Keywords: notification, mumbles, growl, libnotify
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -25,13 +25,18 @@
 ;; boxes, all with different mechanisms).
 
 ;;; History:
-;; 
+;;
+;; * created by Thomas Munro in March 2010
+;; * libnotify support added by Ewan Higgs
 
 ;;; Code:
 
 (defvar alert-function 'alert-send-default
   "The function to send notifications to.
 Set this variable to alert-send-growl, etc as appropriate.")
+
+(defvar alert-notify-program "notify-send"
+  "If you use libnotify, you may need to set this to the libnotify path.")
 
 (defvar alert-growl-program "growlnotify"
   "If you use Growl, you may need to set this to the grownnotify path.")
@@ -47,6 +52,14 @@ A default mechanism for showing alerts."
 (defun alert-send (title body)
   "Show TITLE and BODY to the user (using the installed function)."
   (funcall alert-function title body))
+
+(defun alert-send-notify (title body)
+  "Show TITLE and BODY to a libnotify user."
+  (start-process "notify-send"
+		 "notify-send"
+		 alert-notify-program
+		 title
+		 body))
 
 (defun alert-send-growl (title body)
   "Show TITLE and BODY to a Growl user."
