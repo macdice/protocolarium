@@ -22,7 +22,8 @@
 ;; This is an attempt to make a tomato-shaped egg timer out of some
 ;; old parentheses and a growling computer.  See
 ;; http://en.wikipedia.org/wiki/Pomodoro_Technique for more
-;; information.
+;; information.  It is part of Protocolarium because it serves as an
+;; example of how you might use alert.el.
 ;;
 ;; BRIEF DESCRIPTION
 ;;
