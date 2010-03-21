@@ -15,9 +15,9 @@
 
 ;;; Commentary:
 ;; 
-;; These are the standard fields for FIX 4.4, in a format suitable for use
-;; by 'fix-dictionary' in the sloppy-fix library, along with any custom 
-;; fields you want to add.
+;; These are the standard fields for FIX 4.4, in a format suitable for
+;; use by 'fix-dictionary' in the fix.el library, along with any
+;; custom fields you want to add.
 
 ;;; History:
 ;; 
