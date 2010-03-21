@@ -92,8 +92,25 @@
 (defvar pomodoro-next-end-time nil
   "When the current state is due to end.")
 
+(defvar pomodoro-timer-id nil
+  "The ID of our run-at timer.")
+
 (defvar pomodoro-notified nil
   "Whether we have generated a visual notification.")
+
+(defvar pomodoro-timer-period 60
+  "How long to wait between updating messages, alerts etc.")
+
+(defvar pomodoro-start-work-messages
+  '("Your work starts --- NOW!"
+    "On your marks, get set, go!"
+    "Heads town, tails up"
+    "Chop chop, on with it!")
+  "Some 'words of encouragement' (apologies to SLIME).")
+
+(defun pomodoro-pick (list)
+  "Return a randomly selected member of LIST."
+  (nth (random (length list)) list))
 
 (defun pomodoro-notify (text)
   "Show TEXT using Mumble, Growl etc (via ALERT)."
@@ -145,11 +162,17 @@
     (insert text)
     (insert "\n")))
 
+(defun pomodoro-install-timer ()
+  "Install or reinstall the timer event handler."
+  (when pomodoro-timer-id
+    (cancel-timer pomodoro-timer-id))
+  (run-at-time pomodoro-timer-period nil 'pomodoro-timer-handler))
+
 (defun pomodoro-timer-handler ()
   "Self-reinstalling timer handler."
   (pomodoro-message)
   (when pomodoro-state
-    (run-at-time 60 nil 'pomodoro-timer-handler)))
+    (pomodoro-install-timer)))
 
 (defun pomodoro-work ()
   "Command to run to indicate that you are working on the job at point."
@@ -160,15 +183,15 @@
     (setq pomodoro-start-time now)
     (setq pomodoro-next-end-time (+ now pomodoro-work-duration))
     (setq pomodoro-notified nil)
-    (pomodoro-notify "You work starts -- now!")
-    (run-at-time 60 nil 'pomodoro-timer-handler)))
+    (pomodoro-notify (pomodoro-pick pomodoro-start-work-messages))
+    (pomodoro-install-timer)))
 
 (defun pomodoro-done ()
   "Command to run to indicate that you have finished the job at point."
   (interactive)
   (pomodoro-append-log "done")
   (setq pomodoro-state nil)
-  (pomodoro-notify "Missing accomplished"))
+  (pomodoro-notify "Mission accomplished"))
 
 (defun pomodoro-break ()
   "Command to indicate that you are taking a break, or are interrupted."
@@ -192,7 +215,7 @@
 (defun pomodoro-later ()
   "Command to register a subjob to be done later."
   (interactive)
-  (let ((text (read-from-minibuffer "Defer task: ")))
+  (let ((text (read-from-minibuffer "Describe task to be done later: ")))
     (save-excursion
       (end-of-buffer)
       (insert "\n* ")
